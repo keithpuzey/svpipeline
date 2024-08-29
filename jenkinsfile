@@ -10,11 +10,12 @@ pipeline {
                     def commitMessage = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
                     echo "Commit message: ${commitMessage}"
 
-                    // Set environment variables or flags based on the commit message
-                    if (commitMessage.contains('[skip tests]')) {
-                        env.SKIP_TESTS = 'true'
-                    } else if (commitMessage.contains('[deploy]')) {
+                    // Set environment variables based on the commit message
+                    if (commitMessage.contains('deploy')) {
                         env.DEPLOY = 'true'
+                        env.SKIP_TESTS = 'true'
+                    } else if (commitMessage.contains('[skip tests]')) {
+                        env.SKIP_TESTS = 'true'
                     } else {
                         env.DEFAULT = 'true'
                     }
@@ -24,7 +25,7 @@ pipeline {
 
         stage('Build') {
             when {
-                expression { return env.DEFAULT == 'true' }
+                expression { return env.DEPLOY != 'true' }
             }
             steps {
                 echo 'Building the project...'
@@ -36,7 +37,7 @@ pipeline {
             when {
                 allOf {
                     expression { return env.SKIP_TESTS != 'true' }
-                    expression { return env.DEFAULT == 'true' }
+                    expression { return env.DEPLOY != 'true' }
                 }
             }
             steps {
@@ -48,11 +49,4 @@ pipeline {
         stage('Deploy') {
             when {
                 expression { return env.DEPLOY == 'true' }
-            }
-            steps {
-                echo 'Deploying the application...'
-                // Your deploy steps here
-            }
-        }
-    }
-}
+           ​⬤
