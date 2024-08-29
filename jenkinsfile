@@ -49,4 +49,11 @@ pipeline {
         stage('Deploy') {
             when {
                 expression { return env.DEPLOY == 'true' }
-           ​⬤
+            }
+            steps {
+                echo 'Deploying the application...'
+                // Your deploy steps here
+            }
+        }
+    }
+}
